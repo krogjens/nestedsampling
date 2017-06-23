@@ -1,0 +1,73 @@
+Highest evidence for Model 2 (probability 0.90). 
+
+Model 1 (probability 0.102, 2 variable parameters):
+Estimated value for log10-evidence: -82.643 +- 0.059.
+P-values [ H(replicated obs) > H(obs)]: 
+  n = 1:  0.00. 
+  n = 2:  0.01. 
+  n = 3:  0.00. 
+  n = 4:  0.01. 
+  n = 5:  0.02. 
+  n = 6:  0.01. 
+  n = 7:  0.00. 
+  n = 8:  0.00. 
+  n = 9:  0.00. 
+Percentile at:   0.02	 0.16	 0.50	 0.84	 0.98	 MaxL@	 Mean	+/-  dev.
+Step deviation:  0.112	 0.139	 0.167	 0.211	 0.278	 0.166	 0.174	+/-  0.039
+Exponent:        0.841	 0.942	 1.036	 1.124	 1.225	 1.036	 1.034	+/-  0.091
+log10-Maximal likelihood: -79.854
+
+Model 2 (probability 0.895, 3 variable parameters):
+Estimated value for log10-evidence: -81.700 +- 0.067.
+P-values [ H(replicated obs) > H(obs)]: 
+  n = 1:  0.36. 
+  n = 2:  0.37. 
+  n = 3:  0.36. 
+  n = 4:  0.21. 
+  n = 5:  0.61. 
+  n = 6:  0.28. 
+  n = 7:  0.19. 
+  n = 8:  0.16. 
+  n = 9:  0.22. 
+Percentile at:   0.02	 0.16	 0.50	 0.84	 0.98	 MaxL@	 Mean	+/-  dev.
+Step deviation:  0.111	 0.135	 0.168	 0.214	 0.274	 0.167	 0.174	+/-  0.041
+Exponent:        0.808	 0.908	 1.002	 1.094	 1.193	 1.003	 1.002	+/-  0.093
+Force:          -0.488	-0.373	-0.270	-0.172	-0.069	-0.276	-0.272	+/-  0.101
+log10-Maximal likelihood: -77.921
+
+Model 3 (probability 0.000, 3 variable parameters):
+Estimated value for log10-evidence: -85.608 +- 0.086.
+P-values [ H(replicated obs) > H(obs)]: 
+  n = 1:  0.00. 
+  n = 2:  0.01. 
+  n = 3:  0.01. 
+  n = 4:  0.00. 
+  n = 5:  0.03. 
+  n = 6:  0.02. 
+  n = 7:  0.00. 
+  n = 8:  0.00. 
+  n = 9:  0.00. 
+Percentile at:   0.02	 0.16	 0.50	 0.84	 0.98	 MaxL@	 Mean	+/-  dev.
+Step deviation:  0.055	 0.087	 0.124	 0.168	 0.237	 0.144	 0.127	+/-  0.042
+Exponent:        0.873	 0.999	 1.145	 1.282	 1.429	 1.080	 1.144	+/-  0.138
+Measurem. err.:  0.003	 0.023	 0.060	 0.126	 0.240	 0.024	 0.075	+/-  0.059
+log10-Maximal likelihood: -79.745
+
+Model 4 (probability 0.002, 4 variable parameters):
+Estimated value for log10-evidence: -84.281 +- 0.090.
+P-values [ H(replicated obs) > H(obs)]: 
+  n = 1:  0.34. 
+  n = 2:  0.36. 
+  n = 3:  0.34. 
+  n = 4:  0.17. 
+  n = 5:  0.50. 
+  n = 6:  0.17. 
+  n = 7:  0.17. 
+  n = 8:  0.17. 
+  n = 9:  0.13. 
+Percentile at:   0.02	 0.16	 0.50	 0.84	 0.98	 MaxL@	 Mean	+/-  dev.
+Step deviation:  0.079	 0.106	 0.135	 0.195	 0.255	 0.135	 0.146	+/-  0.045
+Exponent:        0.841	 0.936	 1.067	 1.145	 1.243	 1.074	 1.052	+/-  0.101
+Force:          -0.498	-0.346	-0.252	-0.171	-0.090	-0.268	-0.258	+/-  0.089
+Measurem. err.:  0.003	 0.018	 0.056	 0.128	 0.234	 0.030	 0.071	+/-  0.060
+log10-Maximal likelihood: -77.820
