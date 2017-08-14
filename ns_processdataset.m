@@ -15,13 +15,22 @@ function [results]=ns_processdataset(obs,models,misc)
 %     stoprat - the ratio of evidence in the remaining walkers
 %       versus previously summed evidence at which nested sampling stops
 %     nsteps - number of attempted steps in a run of ns_evolve
+%     nlist - a list specifying the time rescalings to be used for
+%       information content checks
+%     trackmax - the amount of tracks to replicate for the information content check
+%
 %   labels - a list with the names of the parameters
 %   add (optional) - a cell array with functions of theta
 %   replicate - function that generates artificial data by
-%     sampling from the posterier probability distribution for the parameters 
-%   scaling - a function that reshapes the data to what would have been observed
-%     with lower sampling rates by removing data points
-% 
+%     sampling from the posterier probability distribution for the parameters    
+%   scaling (optional) - a function that reshapes the data to what would have been observed
+%     with lower sampling rates by removing data points.
+%   logl_n (optional) - a likelihood function logl_n(obs,theta,n)
+%     like "logl" except that takes in a third argument, n, which states 
+%     the amount of time step rescaling used for the inserted observations. 
+%
+%   If the optional functions are omitted, the nlist must consist only of ones.
+%
 % misc - a struct with fields
 %   data_id - the first part of the filenames for data and output
 %   percentiles_at - a list of values to find percentiles at
