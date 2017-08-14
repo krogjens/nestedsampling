@@ -8,15 +8,19 @@ function [results]=ns_processdataset(obs,models,misc)
 %   logl - the log-likelihood function logl(obs,theta)
 %     where theta can be assigned as theta=invprior(walker.u).
 %   invprior - the inverse of the cumulative prior;
-%     it takes a 1 x options.lengthu vector and returns another vector.
+%     it takes a u-value vector and returns another vector.
+%   genu - function that generates the u-values.
 %   options - a struct with at least the fields:
-%     lengthu - number of independent parameters in the model
 %     nwalkers - number of walkers
 %     stoprat - the ratio of evidence in the remaining walkers
 %       versus previously summed evidence at which nested sampling stops
 %     nsteps - number of attempted steps in a run of ns_evolve
 %   labels - a list with the names of the parameters
 %   add (optional) - a cell array with functions of theta
+%   replicate - function that generates artificial data by
+%     sampling from the posterier probability distribution for the parameters 
+%   scaling - a function that reshapes the data to what would have been observed
+%     with lower sampling rates by removing data points
 % 
 % misc - a struct with fields
 %   data_id - the first part of the filenames for data and output
@@ -37,6 +41,9 @@ function [results]=ns_processdataset(obs,models,misc)
 %   param_stddev - ditto deviations
 %   percentiles - the percentiles of theta matching percentiles_at
 %   maxLpar - maximum likelihood parameters
+%
+% The routine also outputs percentiles for the parameters as well as
+% performing an information content model check with the ns_infcheck function.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -62,11 +69,13 @@ for i = 1:length(models);
         =ns_analyze(results(i).samples,models(i),misc);
 end
 
-% Calculate probability of  H(replicated obs) > H(obs)
+% Replicate data for all models and perform tests
+% (Test)  Calculate probability of  H(replicated obs) > H(obs)
 if isfield(models,'replicate')
-for i = 1:length(models)
-   results(i).prob = ns_infcheck(obs,models(i),results(i).logZ,results(i).samples);
-end
+   for i = 1:length(models)
+      rep = ns_replicate(obs,models(i),results(i).samples,models(i).options.trackmax);
+      results(i).prob = ns_infcheck(obs,rep,models(i));
+   end
 else
     for i = 1:length(models)
         results(i).prob = 0.5;
