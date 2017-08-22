@@ -33,7 +33,7 @@ for i=1:length(models)
 
     if isfield(models(i),'replicate')
       fprintf(fid,'Information content model check:\n');
-      fprintf(fid,' Scaling n: ');
+      fprintf(fid,' Scaling n:');
       for j = 1:length(results(i).prob)
         if isfield(models(i).options,'nlist')
           fprintf(fid,ns_print_val(models(i).options.nlist(j),8));
@@ -42,18 +42,30 @@ for i=1:length(models)
         end
       end 
       fprintf(fid,'\n');
-      fprintf(fid,' p-value:   ');
+      fprintf(fid,' p-value:  ');
       for j = 1:length(results(i).prob)
         fprintf(fid,ns_print_val(results(i).prob(j),8));
       end 
       fprintf(fid,'\n');
+% Print the results of any user defined model checks
       if isfield(models,'checks')
         for j=1:length(models(i).checks)
           fprintf(fid,models(i).checks(j).misc.labels{1});       
           if isfield(models(i).checks(j).misc,'columns')
             fprintf(fid,'\n');
-            label2=models(i).checks(j).misc.labels{2};
-            fprintf(fid,label2);
+            if length(models(i).checks(j).misc.labels)>1
+              label2=models(i).checks(j).misc.labels{2};
+              len1stC=length(sprintf(label2));
+              fprintf(fid,label2);
+            else
+              if isfield(models(i).checks(j).misc,'rows')
+                fprintf(fid,' R  \\  C');
+                len1stC=8;
+              else
+                fprintf(fid,' Input:  ');
+                len1stC=9;
+              end
+            end
             for l=1:length(results(i).checks(j).pvals(1,:));
               fprintf(fid,ns_print_val(models(i).checks(j).misc.columns(l),8));
             end
@@ -61,9 +73,12 @@ for i=1:length(models)
           end
           for k=1:length(results(i).checks(j).pvals(:,1));
             if isfield(models(i).checks(j).misc,'rows')
-              fprintf(fid,ns_print_val(models(i).checks(j).misc.rows(k),length(label2)));
+              fprintf(fid,ns_print_val(models(i).checks(j).misc.rows(k),len1stC));
             elseif isfield(models(i).checks(j).misc,'columns')
-              fprintf(fid,models(i).checks(j).misc.labels{3});
+              fprintf(fid,' p-value:');
+              for l=1:(len1stC-9);
+                fprintf(fid,' ');
+              end
             end
             for l=1:length(results(i).checks(j).pvals(1,:));
               pval=results(i).checks(j).pvals(k,l);

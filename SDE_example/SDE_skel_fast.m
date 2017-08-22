@@ -90,9 +90,9 @@ checks=[checks endpos];
 
 nsteps=[1 2 4 8 16];
 stepcor.scalar=@(track) util_stepcorrelations(track,nsteps);
-misc.labels={'Model check for estimated n-step correlations:';...
-' n:       ';...
-' p-value: '};
+misc.labels={'Model check for estimated n-step correlations:'...
+;' n:      '... % Note: if this line is deleted then ' Input:  ' is printed
+};
 misc.columns=nsteps;
 stepcor.misc=misc;
 checks=[checks stepcor];
@@ -100,8 +100,9 @@ checks=[checks stepcor];
 nsteps=[1 2 4 8 16];
 percentiles=[0.05 0.1:0.1:0.9 0.95];
 stepdist.scalar=@(track) util_stepdist(track,nsteps,percentiles);
-misc.labels={'Model check with p-values for percentiles (columns) for n-step distributions (rows):';...
-'    '};
+misc.labels={'Model check with p-values for percentiles (C) for n-step (R) distributions:'...
+;' R\\C'... % Note: if this line is deleted then ' R  \  C' is printed
+};
 misc.columns=percentiles;
 misc.rows=nsteps;
 stepdist.misc=misc;

@@ -34,11 +34,9 @@ function [results]=ns_processdataset(obs,models,misc)
 %     scalar - a function that takes a trajectory (e.g. obs) and returns a matrix of real numbers
 %     misc.rows (optional) - a list of numbers describing the rows in scalar
 %     misc.colums (optional) - a list of number describing the columns in scalar
-%     misc.labels a cell array with 1 to 3 elements
+%     misc.labels a cell array with 1 or 2 elements
 %       1st element: a string describing the model check
-%       2nd element: (only if field columns exist) a string describing numbers
-%       3rd element: (only if columns but not rows exist) a string probably saying p-value
-%       
+%       2nd element: (optional) a string describing columns and/or rows
 %
 % misc - a struct with fields
 %   data_id - the first part of the filenames for data and output
