@@ -1,4 +1,4 @@
-function SDE_skel()
+function SDE_skel_with_join()
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
 % This skeleton routine carries out Bayesian inference and
@@ -54,6 +54,7 @@ data_path = [misc.data_id,'.txt'];
 data = importdata(data_path);
 %data = data.obs; % Uncomment this if running on noisetrack.mat or
                   % largenoisetrack.mat
+data_list={data data*1.05};
 
 %Specify prior ranges
 Dmin=10^(-4);
@@ -84,28 +85,36 @@ end
 %Specify scalars to calculate p-values
 checks=[];
 
-endpos.scalar=@(track) track(end);
-endpos.misc.labels={'Model check for final position, p-value: '};
+nscales=[1 2 4 8 16 32];
+info.scalar=@(track,theta) 0.666; % Redefined in the model loop
+info.misc.labels={'Model check for information with scaling n (C) and different trajectories (R):'...
+;' R\\C'... % Note: if this line is deleted then ' Input:  ' is printed
+};
+info.misc.columns=nscales;
+checks=[checks info];
+
+endpos.scalar=@(track,theta) track(end);
+endpos.misc.labels={'Model check for final position:'...
+;' Trajectory:'...
+};
 checks=[checks endpos];
 
 nsteps=[1 2 4 8 16];
-stepcor.scalar=@(track) util_stepcorrelations(track,nsteps);
-misc.labels={'Model check for estimated n-step correlations:'...
-;' n:      '... % Note: if this line is deleted then ' Input:  ' is printed
+stepcor.scalar=@(track,theta) util_stepcorrelations(track,nsteps);
+stepcor.misc.labels={'Model check for estimated n-step correlations (C) and different trajectories (R):'...
+;' R\\C'... % Note: if this line is deleted then ' Input:  ' is printed
 };
-misc.columns=nsteps;
-stepcor.misc=misc;
+stepcor.misc.columns=nsteps;
 checks=[checks stepcor];
 
 nsteps=[1 2 4 8 16];
 percentiles=[0.05 0.1:0.1:0.9 0.95];
-stepdist.scalar=@(track) util_stepdist(track,nsteps,percentiles);
-misc.labels={'Model check with p-values for percentiles (C) for n-step (R) distributions:'...
+stepdist.scalar=@(track,theta) util_stepdist(track,nsteps,percentiles);
+stepdist.misc.labels={'Model check with p-values for sum of percentiles (C) for n-step (R) distributions:'...
 ;' R\\C'... % Note: if this line is deleted then ' R  \  C' is printed
 };
-misc.columns=percentiles;
-misc.rows=nsteps;
-stepdist.misc=misc;
+stepdist.misc.columns=percentiles;
+stepdist.misc.rows=nsteps;
 checks=[checks stepdist];
 
 %Specify options
@@ -127,6 +136,7 @@ for i=1:size(MM,1)
   models(i).logl_n=@(obs,theta,n) SDE_logl_m(obs,SDE_params(theta,MM(i,:)),n);
   models(i).scaling =@(obs,n) SDE_scaling(obs,n); % Function that scales data
   models(i).replicate =@(obs,theta,n) SDE_replicate(obs,SDE_params(theta,MM(i,:)),n);
+  checks(1).scalar = @(obs,theta) arrayfun(@(n) SDE_logl_m(SDE_scaling(obs,n),SDE_params(theta,MM(i,:)),n),checks(1).misc.columns);
   models(i).checks=checks;
   models(i).invprior=@(u) SDE_invprior(u,ranges,MM(i,:));
   models(i).labels=[1:n_perm];
@@ -135,14 +145,7 @@ for i=1:size(MM,1)
       models(i).labels=[models(i).labels j+n_perm];
     end
   end
-%  models(i).add{1}=@(theta) theta(1)^2/(2*tau^(2*final(fbm_params(theta,MM(i,:)))));
- % models(i).labels=[models(i).labels 6];
-  for j=1:2
-    if MM(i,j)==1
-%      models(i).add{end+1}=@(theta) theta(j+1)/tau;
-  %    models(i).labels=[models(i).labels 6+j];
-    end
-  end
+  models_join(i)=ns_join_simple(models(i),length(data_list));
 end
 
 %Percentiles to be calculated
@@ -162,7 +165,7 @@ misc.titles=...
 misc.nssummary=['_results.txt'];
 
 %Run the nested sampling algorithm for all models and compile results
-[results] = ns_processdataset(data,models,misc);
+[results] = ns_processdataset(data_list,models_join,misc);
 
 path=[misc.data_id,'_output'];
 

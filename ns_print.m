@@ -23,11 +23,13 @@ for i=1:length(models)
     end
     fprintf(fid,' MaxL@    Mean    +/- dev.\n');
     for j=1:length(models(i).labels)
+      if models(i).labels(j)>0
         fprintf(fid,misc.labels(models(i).labels(j),:));
         for k=1:length(misc.percentiles_at)
           fprintf(fid,ns_print_val(results(i).percentiles(j,k),9));
         end
         fprintf(fid,[ns_print_val(results(i).maxLpar(j),9) ns_print_val(results(i).param_mean(j),9) '+/-' ns_print_val(results(i).param_stddev(j),9) '\n']);
+      end
     end
     fprintf(fid,'log10-Maximal likelihood: % .3f\n',results(i).samples(end).logl/log(10));
 
