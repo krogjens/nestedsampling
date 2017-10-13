@@ -1,4 +1,4 @@
-function [walker_new,step_mod]=ns_evolve(obs,logl,invprior,logLstar,walker,step_mod,options)
+function [walker_new,step_mod]=ns_evolve(obs,model,invprior,logLstar,walker,step_mod,options)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Uses the MCMC technique to find a new sample uniformly distributed inside
@@ -22,6 +22,9 @@ if step_mod==0
   step_mod=1;
 end
 
+%Specify likelihood function
+logl = model.logl;
+
 % Attempt to generate new walker through independent guess
 walker_new.u = rand(1,length(walker.u));
 walker_new.theta = invprior(walker_new.u);
@@ -38,8 +41,13 @@ if(walker_new.logl <= logLstar)	% Do MCMC if likelihood requirement failed
    while(i < options.nsteps)
       % Propose step for parameters
       % Ensure that new walker.u is between 0 and 1
-      for n=1:length(walker.u)
-        walker.u(n) = mod(walker_new.u(n) + (rand - 0.5) * step_mod,1);
+      if isfield(model,'u_evolve')
+         delta_u = (rand(1,length(walker.u) - 0.5) * step_mod;
+         walker.u = u_evolve(walker.u,delta_u);
+      else
+         for n=1:length(walker.u)
+           walker.u(n) = mod(walker_new.u(n) + (rand - 0.5) * step_mod,1);
+         end
       end
 
       walker.theta=invprior(walker.u);

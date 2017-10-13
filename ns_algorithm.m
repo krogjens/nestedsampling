@@ -100,7 +100,7 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
 	logLstar=walkers(worst).logl;           %New likelihood constraint
 
 	%Evolve copied walker within constraint
-	[walker_new,step_mod]=ns_evolve(obs,logl,invprior,logLstar,walkers(copy),step_mod,options);
+	[walker_new,step_mod]=ns_evolve(obs,model,invprior,logLstar,walkers(copy),step_mod,options);
 	walkers(worst)=walker_new;           %Insert new walker
 	logwidth=logwidth-log(1.0+1.0/options.nwalkers);   %Shrink interval
     if mod(i,500) == 0
