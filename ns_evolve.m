@@ -42,7 +42,7 @@ if(walker_new.logl <= logLstar)	% Do MCMC if likelihood requirement failed
       % Propose step for parameters
       % Ensure that new walker.u is between 0 and 1
       if isfield(model,'u_evolve')
-         delta_u = (rand(1,length(walker.u) - 0.5) * step_mod;
+         delta_u = (rand(1,length(walker.u)) - 0.5) * step_mod;
          walker.u = u_evolve(walker.u,delta_u);
       else
          for n=1:length(walker.u)
