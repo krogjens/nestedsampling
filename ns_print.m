@@ -4,7 +4,12 @@ function ns_print(results,models,misc)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 fname = [misc.data_id,misc.nssummary];
-fid = fopen(fname,'w');
+if isfield(misc,'append')
+  fid = fopen(fname,'a');
+  fprintf(fid,misc.append);
+else
+  fid = fopen(fname,'w');
+end
 
 % Find best model (choose one)
 for i = 1:length(models)
@@ -92,5 +97,6 @@ for i=1:length(models)
       end
     end
 end
+fprintf(fid,'\n');
 fclose(fid);
 
