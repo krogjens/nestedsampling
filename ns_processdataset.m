@@ -30,6 +30,13 @@ function [results]=ns_processdataset(obs,models,misc)
 %     the amount of time step rescaling used for the inserted observations. 
 %
 %   If the optional functions are omitted, the nlist must consist only of ones.
+%   checks (optional) - a list of sctructs with fields
+%     scalar - a function that takes a trajectory (e.g. obs) and returns a matrix of real numbers
+%     misc.rows (optional) - a list of numbers describing the rows in scalar
+%     misc.colums (optional) - a list of number describing the columns in scalar
+%     misc.labels a cell array with 1 or 2 elements
+%       1st element: a string describing the model check
+%       2nd element: (optional) a string describing columns and/or rows
 %
 % misc - a struct with fields
 %   data_id - the first part of the filenames for data and output
@@ -80,10 +87,16 @@ end
 
 % Replicate data for all models and perform tests
 % (Test)  Calculate probability of  H(replicated obs) > H(obs)
+% optionally calculates further model checks according to the scalars in the field checks
 if isfield(models,'replicate')
    for i = 1:length(models)
       rep = ns_replicate(obs,models(i),results(i).samples,models(i).options.trackmax);
       results(i).prob = ns_infcheck(obs,rep,models(i));
+      if isfield(models,'checks')
+        for j=1:length(models(i).checks)
+          results(i).checks(j).pvals=ns_pvalues(obs,rep,models(i).checks(j).scalar);
+        end
+      end
    end
 else
     for i = 1:length(models)
