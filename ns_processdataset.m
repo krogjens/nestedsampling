@@ -43,6 +43,8 @@ function [results]=ns_processdataset(obs,models,misc)
 %   percentiles_at - a list of values to find percentiles at
 %   labels - a list with names for the parameters (theta)
 %   titles - further titles/names for ns_print
+%   nssummary (optional) - final part of name of a summary file
+%   append (optional) - what to write initially if nssummary should be opened in append mode
 %
 % results - a list of structs with fields
 %   logZ - the log of the evidence
