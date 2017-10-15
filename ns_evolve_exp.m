@@ -1,4 +1,4 @@
-function [walker_new,step_mod]=ns_evolve(obs,model,invprior,logLstar,walker,step_mod,options)
+function [walker_new,step_mod]=ns_evolve_exp(obs,model,logLstar,walker,step_mod)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Uses the MCMC technique to find a new sample uniformly distributed inside
@@ -26,8 +26,8 @@ end
 logl = model.logl;
 
 % Attempt to generate new walker through independent guess
-walker_new.u = rand(1,length(walker.u));
-walker_new.theta = invprior(walker_new.u);
+walker_new.u = model.genu();
+walker_new.theta = model.invprior(walker_new.u);
 walker_new.logl=logl(obs,walker_new.theta); % Calculates new likelihood 
 
 if(walker_new.logl <= logLstar)	% Do MCMC if likelihood requirement failed
@@ -38,19 +38,19 @@ if(walker_new.logl <= logLstar)	% Do MCMC if likelihood requirement failed
 
    i = 0;
    reject = 0;
-   while(i < options.nsteps)
+   while(i < model.options.nsteps)
       % Propose step for parameters
       % Ensure that new walker.u is between 0 and 1
       if isfield(model,'u_evolve')
          delta_u = (rand(1,length(walker.u)) - 0.5) * step_mod;
-         walker.u = u_evolve(walker.u,delta_u);
+         walker.u = model.u_evolve(walker.u,delta_u);
       else
          for n=1:length(walker.u)
            walker.u(n) = mod(walker_new.u(n) + (rand - 0.5) * step_mod,1);
          end
       end
 
-      walker.theta=invprior(walker.u);
+      walker.theta=model.invprior(walker.u);
       walker.logl=logl(obs,walker.theta); % Calculates new likelihood
 
       if(walker.logl > logLstar)              % Updates if likelihood increased
@@ -60,7 +60,7 @@ if(walker_new.logl <= logLstar)	% Do MCMC if likelihood requirement failed
       end
 	  i = i + 1;
    end
-   R = reject / options.nsteps;  % Ratio of rejectance
+   R = reject / model.options.nsteps;  % Ratio of rejectance
    step_mod = min(step_mod * exp(0.5-R),1);	% Update step modifier
 end
 

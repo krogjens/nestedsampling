@@ -12,7 +12,7 @@ function [logZ,H,samples]=ns_algorithm(obs,model)%
 %   MCMC walk. When the remaining parameter space
 %   becomes small, the MCMC steps are adjusted in length to ensure a
 %   decent success rate of the MCMC steps.
-%   If step_mod = 0, then ns_evolve should initiate the variable by itself.
+%   If step_mod = 0, then the ns_evolve routine should initiate the variable by itself.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -50,7 +50,7 @@ logwidth=-log(options.nwalkers+1);
 %Current ratio of "slab" to total integral and value for stopping
 Zrat=1;
 
-step_mod = 0; 		%Tell ns_evolve to initialize step_mod 
+step_mod = 0; 		%Tell the ns_evolve routine to initialize step_mod 
 
 i = 1;
 
@@ -100,12 +100,16 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
 	logLstar=walkers(worst).logl;           %New likelihood constraint
 
 	%Evolve copied walker within constraint
-	[walker_new,step_mod]=ns_evolve(obs,model,invprior,logLstar,walkers(copy),step_mod,options);
+        if isfield(model,'evolver')
+          [walker_new,step_mod]=model.evolver(obs,model,logLstar,walkers(copy),step_mod);
+        else
+	  [walker_new,step_mod]=ns_evolve_rectangle(obs,model,logLstar,walkers(copy),step_mod);
+        end
 	walkers(worst)=walker_new;           %Insert new walker
 	logwidth=logwidth-log(1.0+1.0/options.nwalkers);   %Shrink interval
-    if mod(i,500) == 0
-       fprintf('After %i iterations of nested sampling, Zrat =%.4f\n',i,Zrat);
-    end
+        if mod(i,500) == 0
+          fprintf('After %i iterations with %i parameter(s), Zrat =%.4f\n',i,length(walker_new.u),Zrat);
+        end
 	i = i + 1;
 end
 
