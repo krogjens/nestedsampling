@@ -38,7 +38,7 @@ samples = [];
 tries = 0;
 for i=1:options.nwalkers
   walkers(i).logl = -Inf;
-  while walkers(i).logl = -Inf
+  while walkers(i).logl == -Inf
      tries = tries + 1; % Count the number of total tries to find finite logl samples
      walkers(i).u=model.genu();
      walkers(i).theta=invprior(walkers(i).u);
