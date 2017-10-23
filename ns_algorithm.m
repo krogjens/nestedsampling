@@ -34,16 +34,18 @@ H = zeros(1,length(nlist));          % Initial information
 
 samples = [];
 
-%Generate the initial set of walkers
+%Generate the initial set of walkers with finite likelihood
+tries = 0;
 for i=1:options.nwalkers
-  walkers(i).u=model.genu();
-  walkers(i).theta=invprior(walkers(i).u);
+  walkers(i).logl = -Inf;
+  while walkers(i).logl = -Inf
+     tries = tries + 1; % Count the number of total tries to find finite logl samples
+     walkers(i).u=model.genu();
+     walkers(i).theta=invprior(walkers(i).u);
+     walkers(i).logl=logl(obs,invprior(walkers(i).u));
+  end
 end
 
-%Calculate likelihood for the walkers
-for i = 1:options.nwalkers
-        walkers(i).logl=logl(obs,invprior(walkers(i).u));
-end
 %Outermost interval of prior mass
 logwidth=-log(options.nwalkers+1);
 
@@ -135,6 +137,9 @@ for j=1:options.nwalkers
         end
     end  
 end
+
+%Adjust for samples with zero likelihood
+logZ(1) = logZ(1)  + log(options.nwalkers / tries);
 
 %Calculate posterior probability of the samples
 for j=1:length(samples)
