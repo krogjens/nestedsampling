@@ -1,4 +1,4 @@
-function [logZ,H,samples]=ns_algorithm(obs,model)%
+function [logZ,H,samples,testlist]=ns_algorithm(obs,model)%
 %,logl,logl_n,invprior,options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Determines the evidence for a model with likelihood function logl
@@ -15,9 +15,19 @@ function [logZ,H,samples]=ns_algorithm(obs,model)%
 %   If step_mod = 0, then the ns_evolve routine should initiate the variable by itself.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+if isfield(model.options,'ntest')
+  ntest=model.options.ntest;
+else
+  ntest=500;
+end
 
 options = model.options;
 logl = model.logl;
+
+if ~isfield(model,'evolver')
+  model.evolver=@(obs,model,logLstar,walker,step_mod)ns_evolve_rectangle(obs,model,logLstar,walker,step_mod);
+end
+
 if isfield(model,'logl_n')
    logl_n = model.logl_n;
 end
@@ -33,6 +43,7 @@ logZ=log(0.0)*ones(1,length(nlist)); % Initial evidence
 H = zeros(1,length(nlist));          % Initial information
 
 samples = [];
+conv_res =[];
 
 %Generate the initial set of walkers with finite likelihood
 tries = 0;
@@ -102,15 +113,14 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
 	logLstar=walkers(worst).logl;           %New likelihood constraint
 
 	%Evolve copied walker within constraint
-        if isfield(model,'evolver')
-          [walker_new,step_mod]=model.evolver(obs,model,logLstar,walkers(copy),step_mod);
-        else
-	  [walker_new,step_mod]=ns_evolve_rectangle(obs,model,logLstar,walkers(copy),step_mod);
-        end
+        [walker_new,step_mod]=model.evolver(obs,model,logLstar,walkers(copy),step_mod);
 	walkers(worst)=walker_new;           %Insert new walker
 	logwidth=logwidth-log(1.0+1.0/options.nwalkers);   %Shrink interval
-        if mod(i,500) == 0
+        if mod(i,ntest) == 0
           fprintf('After %i iterations with %i parameter(s), Zrat =%.4f\n',i,length(walker_new.u),Zrat);
+          if isfield(model,'test')
+            testlist(i/ntest).res=model.test(obs,model,logLstar,walkers,step_mod);
+          end
         end
 	i = i + 1;
 end
