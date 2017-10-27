@@ -21,6 +21,8 @@ else
   ntest=500;
 end
 
+testlist={};
+
 options = model.options;
 logl = model.logl;
 
