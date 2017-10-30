@@ -28,7 +28,7 @@ model.genu=@() rand(1,2);
 
 %Specify the functions that evolves the walker
 %model.evolver=@ns_evolve_rectangle;
-model.evolver=@ns_evolve_rectangle;
+model.evolver=@ns_evolve_exp;
 
 %Specify the logl
 log_normal=@(obs,mu,var) -log(sqrt(2*pi*var))*(length(obs)-1)-sum((obs(2:end)-obs(1:(end-1))-mu).^2)/(2*var);
@@ -38,7 +38,7 @@ model.logl=@(obs,theta) log_normal(obs,theta(2),2*theta(1));
 data=cumsum(sqrt(2*1)*randn(1000,1));
 
 %Specify the test routine
-ntesters=1000;
+ntesters=5*options.nwalkers;
 model.test=@(obs,model,logLstar,walkers,step_mod) ns_test_evolve_min(obs,model,logLstar,walkers,step_mod,ntesters);
 
 %Run the nested sampling algorithm
@@ -50,13 +50,13 @@ curves=zeros(length(testlist(1).res)+1,ncurves);
 for i=1:ncurves
   curves(2:end,i)=testlist(i).res;
 end
-meanend=mean(curves(end,:));
+meanend=mean(curves(ceil(end/3):end,:));
 for i=1:ncurves
-  curves(:,i)=1/meanend*curves(:,i)+i-1;
+  curves(:,i)=2*curves(:,i)/meanend(i)+i-1;
 end
 figure(1)
 plot(transpose(0:(length(curves(:,1))-1)),curves)
 hold on
-plot(transpose(0:(length(curves(:,1))-1)),ones(length(curves(:,1)),1)*curves(end,:),':')
+plot(transpose(0:(length(curves(:,1))-1)),ones(length(curves(:,1)),1)*(2:(ncurves+1)),':')
 hold off
 
