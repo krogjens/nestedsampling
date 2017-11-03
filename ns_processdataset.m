@@ -18,6 +18,9 @@ function [results]=ns_processdataset(obs,models,misc)
 %     nlist - a list specifying the time rescalings to be used for
 %       information content checks
 %     trackmax - the amount of tracks to replicate for the information content check
+%     maxsamples (optional) - the maximum number of samples to output from ns_algorithm
+%     ntest (optional) - number of iterations per print of status message and possible testing of MCMC convergence
+%   test (optional) - a function that tests MCMC convergence: test(obs,model,logLstar,walkers,step_mod)
 %
 %   labels - a list with the names of the parameters
 %   add (optional) - a cell array with functions of theta

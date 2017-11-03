@@ -21,6 +21,12 @@ else
   ntest=500;
 end
 
+if isfield(model.options,'maxsamples')
+  maxsampm1=model.options.maxsamples-1;
+else
+  maxsampm1=Inf;
+end
+
 testlist={};
 
 options = model.options;
@@ -59,8 +65,8 @@ for i=1:options.nwalkers
   end
 end
 
-%Outermost interval of prior mass
-logwidth=-log(options.nwalkers+1);
+%Outermost interval of prior mass adjust for samples with zero likelihood
+logwidth=-log(options.nwalkers+1)+log(options.nwalkers / tries);
 
 %Current ratio of "slab" to total integral and value for stopping
 Zrat=1;
@@ -81,7 +87,16 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
     sample.theta=walkers(worst).theta;
     sample.logl=walkers(worst).logl;
     sample.post=logWt;
-    samples = [samples sample];
+    if length(samples)<maxsampm1
+      samples = [samples sample];
+    else
+      k=randi(maxsampm1);
+      sumpost=ns_logsumexp2(sample.post,samples(k).post);
+      if log(rand)<sample.post-sumpost
+        samples(k)=sample;
+      end
+      samples(k).post=sumpost;
+    end
 
 	%Update evidence and check for stopping criteria
 	logZnew=ns_logsumexp2(logZ(1),logWt); 	% Updates evidence
@@ -138,7 +153,16 @@ for j=1:options.nwalkers
     sample.theta=walkers(j).theta;
     sample.logl=walkers(j).logl;
     sample.post=logWt;
-    samples = [samples sample];
+    if length(samples)<maxsampm1 || j==options.nwalkers
+      samples = [samples sample];
+    else
+      k=randi(maxsampm1);
+      sumpost=ns_logsumexp2(sample.post,samples(k).post);
+      if log(rand)<sample.post-sumpost
+        samples(k)=sample;
+      end
+      samples(k).post=sumpost;
+    end
     if isfield(model,'scaling')
         for n = 2:length(nlist);
             n2 = nlist(n);
@@ -150,8 +174,8 @@ for j=1:options.nwalkers
     end  
 end
 
-%Adjust for samples with zero likelihood
-logZ(1) = logZ(1)  + log(options.nwalkers / tries);
+%%Adjust for samples with zero likelihood
+%logZ(1) = logZ(1)  + log(options.nwalkers / tries);
 
 %Calculate posterior probability of the samples
 for j=1:length(samples)
