@@ -44,7 +44,7 @@ if(walker_new.logl <= logLstar)	% Do MCMC if likelihood requirement failed
       % Ensure that new walker.u is between 0 and 1
       delta_u=(rand(size(walker.u)) - 0.5) .* step_mod;
       if isfield(model,'u_evolve')
-         walker.u = model.u_evolve(walker.u,delta_u);
+         walker.u = model.u_evolve(walker_new.u,delta_u);
       else
          for n=1:length(walker.u)
            walker.u(n) = mod(walker_new.u(n) + delta_u(n),1);
@@ -62,7 +62,7 @@ if(walker_new.logl <= logLstar)	% Do MCMC if likelihood requirement failed
       end
       i = i + 1;
    end
-   frac=0.5;
+   frac=0.1;
    for n=1:length(step_mod)
      step_mod(n)= 0.5*(1+((1/frac*accept(n)+step_mod(n)/4)/(accept(n)+reject(n)+step_mod(n)))^(1/length(step_mod)))*step_mod(n);
      step_mod(n) = min(step_mod(n),1);	% Update step modifier
