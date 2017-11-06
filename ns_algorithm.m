@@ -1,4 +1,4 @@
-function [logZ,H,samples]=ns_algorithm(obs,model)%
+function [logZ,H,samples,testlist]=ns_algorithm(obs,model)%
 %,logl,logl_n,invprior,options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Determines the evidence for a model with likelihood function logl
@@ -15,9 +15,27 @@ function [logZ,H,samples]=ns_algorithm(obs,model)%
 %   If step_mod = 0, then the ns_evolve routine should initiate the variable by itself.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+if isfield(model.options,'ntest')
+  ntest=model.options.ntest;
+else
+  ntest=500;
+end
+
+if isfield(model.options,'maxsamples')
+  maxsampm1=model.options.maxsamples-1;
+else
+  maxsampm1=Inf;
+end
+
+testlist={};
 
 options = model.options;
 logl = model.logl;
+
+if ~isfield(model,'evolver')
+  model.evolver=@(obs,model,logLstar,walker,step_mod)ns_evolve_rectangle(obs,model,logLstar,walker,step_mod);
+end
+
 if isfield(model,'logl_n')
    logl_n = model.logl_n;
 end
@@ -33,19 +51,22 @@ logZ=log(0.0)*ones(1,length(nlist)); % Initial evidence
 H = zeros(1,length(nlist));          % Initial information
 
 samples = [];
+conv_res =[];
 
-%Generate the initial set of walkers
+%Generate the initial set of walkers with finite likelihood
+tries = 0;
 for i=1:options.nwalkers
-  walkers(i).u=model.genu();
-  walkers(i).theta=invprior(walkers(i).u);
+  walkers(i).logl = -Inf;
+  while walkers(i).logl == -Inf
+     tries = tries + 1; % Count the number of total tries to find finite logl samples
+     walkers(i).u=model.genu();
+     walkers(i).theta=invprior(walkers(i).u);
+     walkers(i).logl=logl(obs,invprior(walkers(i).u));
+  end
 end
 
-%Calculate likelihood for the walkers
-for i = 1:options.nwalkers
-        walkers(i).logl=logl(obs,invprior(walkers(i).u));
-end
-%Outermost interval of prior mass
-logwidth=-log(options.nwalkers+1);
+%Outermost interval of prior mass adjust for samples with zero likelihood
+logwidth=-log(options.nwalkers+1)+log(options.nwalkers / tries);
 
 %Current ratio of "slab" to total integral and value for stopping
 Zrat=1;
@@ -66,7 +87,16 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
     sample.theta=walkers(worst).theta;
     sample.logl=walkers(worst).logl;
     sample.post=logWt;
-    samples = [samples sample];
+    if length(samples)<maxsampm1
+      samples = [samples sample];
+    else
+      k=randi(maxsampm1);
+      sumpost=ns_logsumexp2(sample.post,samples(k).post);
+      if log(rand)<sample.post-sumpost
+        samples(k)=sample;
+      end
+      samples(k).post=sumpost;
+    end
 
 	%Update evidence and check for stopping criteria
 	logZnew=ns_logsumexp2(logZ(1),logWt); 	% Updates evidence
@@ -100,15 +130,14 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
 	logLstar=walkers(worst).logl;           %New likelihood constraint
 
 	%Evolve copied walker within constraint
-        if isfield(model,'evolver')
-          [walker_new,step_mod]=model.evolver(obs,model,logLstar,walkers(copy),step_mod);
-        else
-	  [walker_new,step_mod]=ns_evolve_rectangle(obs,model,logLstar,walkers(copy),step_mod);
-        end
+        [walker_new,step_mod]=model.evolver(obs,model,logLstar,walkers(copy),step_mod);
 	walkers(worst)=walker_new;           %Insert new walker
 	logwidth=logwidth-log(1.0+1.0/options.nwalkers);   %Shrink interval
-        if mod(i,500) == 0
+        if mod(i,ntest) == 0
           fprintf('After %i iterations with %i parameter(s), Zrat =%.4f\n',i,length(walker_new.u),Zrat);
+          if isfield(model,'test')
+            testlist(i/ntest).res=model.test(obs,model,logLstar,walkers,step_mod);
+          end
         end
 	i = i + 1;
 end
@@ -124,7 +153,16 @@ for j=1:options.nwalkers
     sample.theta=walkers(j).theta;
     sample.logl=walkers(j).logl;
     sample.post=logWt;
-    samples = [samples sample];
+    if length(samples)<maxsampm1 || j==options.nwalkers
+      samples = [samples sample];
+    else
+      k=randi(maxsampm1);
+      sumpost=ns_logsumexp2(sample.post,samples(k).post);
+      if log(rand)<sample.post-sumpost
+        samples(k)=sample;
+      end
+      samples(k).post=sumpost;
+    end
     if isfield(model,'scaling')
         for n = 2:length(nlist);
             n2 = nlist(n);
@@ -135,6 +173,9 @@ for j=1:options.nwalkers
         end
     end  
 end
+
+%%Adjust for samples with zero likelihood
+%logZ(1) = logZ(1)  + log(options.nwalkers / tries);
 
 %Calculate posterior probability of the samples
 for j=1:length(samples)
