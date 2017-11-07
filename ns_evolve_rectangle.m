@@ -62,7 +62,7 @@ if(walker_new.logl <= logLstar)	% Do MCMC if likelihood requirement failed
       end
       i = i + 1;
    end
-   frac=0.1;
+   frac=0.5;
    for n=1:length(step_mod)
      step_mod(n)= 0.5*(1+((1/frac*accept(n)+step_mod(n)/4)/(accept(n)+reject(n)+step_mod(n)))^(1/length(step_mod)))*step_mod(n);
      step_mod(n) = min(step_mod(n),1);	% Update step modifier
