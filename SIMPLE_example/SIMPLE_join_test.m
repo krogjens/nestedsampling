@@ -20,7 +20,7 @@ model.invprior=@(u) [Dmin*exp(u(1)*log(Dmax/Dmin)); (mumax-mumin)*u(2)+mumin];
 options.nwalkers=200;   % Number of walkers to be generated
 options.stoprat=10^(-2);% Ratio to stop sampling
 options.nsteps=30;      % Attempted number of steps in parameter space
-options.ntest=500;
+options.ntest=1000;
 model.options=options;
 
 %Specify the u-generator
@@ -47,7 +47,7 @@ misc.titles=...
 misc.data_id = 'simple';
 
 %Generate the data
-lenobs=7;
+lenobs=20;
 data={};
 for n=1:lenobs
   data{n}=cumsum(sqrt(2*1)*randn(200,1));
