@@ -72,7 +72,7 @@ tic
 
 % Run nested sampling algorithm for each model
 parfor i=1:length(models);
-    [results(i).logZ,results(i).H,results(i).samples,not_used]...
+    [results(i).logZ,results(i).H,results(i).samples,results(i).testlist]...
         =ns_algorithm(obs,models(i));
 end
 

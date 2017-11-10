@@ -69,7 +69,7 @@ end
 logwidth=-log(options.nwalkers+1)+log(options.nwalkers / tries);
 
 %Current ratio of "slab" to total integral and value for stopping
-Zrat=1;
+Zrat=Inf; 
 
 step_mod = 0; 		%Tell the ns_evolve routine to initialize step_mod 
 
@@ -78,7 +78,7 @@ i = 1;
 while (Zrat>options.stoprat) 	%Stops when the increments of the integral are small
 
 	%Identify worst likelihood
-	[worst_L,worst]=min([walkers(:).logl]);
+	[worst_L,worst]=min([walkers(:).logl]); 
 
 	%Calculate weight of worst walker
 	logWt=logwidth+worst_L;

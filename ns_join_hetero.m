@@ -1,10 +1,11 @@
 function modelsjoin = ns_join_hetero(model,u_unfix,theta_unfix,add_unfix,lenobs)
 % NB: ns_join expects this to run if lenobs=1 and all unfix are zeros even though there are multiple trajectories.
 
-lengthu=length(u_unfix)+(lenobs-1)*sum(u_unfix);
-modelsjoin.genu = util_generate_u(lengthu);
+modelsjoin = model;
 
-modelsjoin.options = model.options;
+lengthu=length(u_unfix)+(lenobs-1)*sum(u_unfix);
+modelsjoin.genu = @() util_generate_u(lengthu);
+
 modelsjoin.logl = @(obs,theta) sum(arrayfun(@(i) model.logl(obs{i},ns_join_reduce(theta,theta_unfix,i)),1:length(obs)));
 
 modelsjoin.invprior =@(u) ns_join_invprior(model.invprior,u,u_unfix,theta_unfix);
@@ -37,13 +38,13 @@ if isfield(model,'add')
   end 
 end
 if isfield(model,'checks')
-  modelsjoin.checks = model.checks;
+%  modelsjoin.checks = model.checks;
   for i=1:length(model.checks)
     if isfield(model.checks(i).misc,'join')
       modelsjoin.checks(i).scalar =  @(obs,theta) model.checks(i).misc.join(arrayfun(@(j) model.checks(i).scalar(obs{j},ns_join_reduce(theta,theta_unfix,j)),1:length(obs),'UniformOutput',false));
       clear model.checks(i).misc.join;
     else
-      if isfield(model.checks(i).misc,'rows') | lenobs==1
+      if isfield(model.checks(i).misc,'rows') || lenobs==1
         modelsjoin.checks(i).scalar =  @(obs,theta) ns_join_sum(arrayfun(@(j) model.checks(i).scalar(obs{j},ns_join_reduce(theta,theta_unfix,j)),1:length(obs),'UniformOutput',false));
       else
         if isfield(model.checks(i).misc,'columns')
