@@ -41,13 +41,13 @@ if(walker_new.logl <= logLstar)	% Do MCMC if likelihood requirement failed
    accept = zeros(size(walker.u));
    for i=1:model.options.nsteps
       delta_u=(rand(size(walker.u)) - 0.5) .* step_mod; % Propose step for parameters
-      [walker_new,delta_a,delta_r]=walker_step(obs,model,logLstar,walker_new,delta_u);
+      [walker_new,delta_a,delta_r,dim_mod]=walker_step(obs,model,logLstar,walker_new,delta_u);
       accept = accept + delta_a;
       reject = reject + delta_r;
    end
    frac=0.5;
    for n=1:length(step_mod)
-     step_mod(n)= 0.5*(1+((1/frac*accept(n)+step_mod(n)/4)/(accept(n)+reject(n)+step_mod(n)))^(1/length(step_mod)))*step_mod(n);
+     step_mod(n)= 0.5*(1+((1/frac*accept(n)+step_mod(n)/4)/(accept(n)+reject(n)+step_mod(n)/4))^(1/dim_mod(n)))*step_mod(n);
      step_mod(n) = min(step_mod(n),1);	% Update step modifier
    end
 end
