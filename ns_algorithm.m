@@ -55,6 +55,7 @@ conv_res =[];
 
 %Generate the initial set of walkers with finite likelihood
 tries = 0;
+logsumwalkers=-Inf;
 for i=1:options.nwalkers
   walkers(i).logl = -Inf;
   while walkers(i).logl == -Inf
@@ -63,10 +64,11 @@ for i=1:options.nwalkers
      walkers(i).theta=invprior(walkers(i).u);
      walkers(i).logl=logl(obs,invprior(walkers(i).u));
   end
+  logsumwalkers=ns_logsumexp2(logsumwalkers,walkers(i).logl);
 end
 
-%Outermost interval of prior mass adjust for samples with zero likelihood
-logwidth=-log(options.nwalkers+1)+log(options.nwalkers / tries);
+%Outermost interval of prior mass, after one shrink, adjusted for samples with zero likelihood
+logwidth=-log(options.nwalkers)+log(options.nwalkers / tries);
 
 %Current ratio of "slab" to total integral and value for stopping
 Zrat=Inf; 
@@ -76,6 +78,8 @@ step_mod = 0; 		%Tell the ns_evolve routine to initialize step_mod
 i = 1;
 
 while (Zrat>options.stoprat) 	%Stops when the increments of the integral are small
+
+	logwidth=logwidth-log(1.0+1.0/options.nwalkers);   %Shrink interval
 
 	%Identify worst likelihood
 	[worst_L,worst]=min([walkers(:).logl]); 
@@ -106,22 +110,16 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
         H(1) = exp(logWt - logZnew) * worst_L + exp(logZ(1) - logZnew) * (H(1) + logZ(1)) - logZnew;
     end
     logZ(1) = logZnew;
-    Zrat=exp(log(options.nwalkers)+logWt-logZ(1));  % Measures increment of evidence
     if isfield(model,'scaling')
         for n = 2:length(nlist);
             n2 = nlist(n);
             sc_obs = model.scaling(obs,n2);
-            worst_L = logl_n(sc_obs,invprior(walkers(worst).u),n2);
-            logWt = logwidth + worst_L;
+            worst_Ln = logl_n(sc_obs,invprior(walkers(worst).u),n2);
+            logWt = logwidth + worst_Ln;
             logZ(n) = ns_logsumexp2(logZ(n),logWt);
         end
     end  
 	
-	if Zrat< options.stoprat 		% Make sure the maximum weight is not too large
-		[best_L,~]=max([walkers(:).logl]);
-		Zrat = exp(log(options.nwalkers)+logwidth + best_L - logZ(1));
-	end
-
 	%Find random walker to initiate generation of new walker
 	copy = ceil(options.nwalkers*rand);  	%Choose random number 1<copy<n_prior
 	while(copy==worst && options.nwalkers>1) 
@@ -132,9 +130,10 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
 	%Evolve copied walker within constraint
         [walker_new,step_mod]=model.evolver(obs,model,logLstar,walkers(copy),step_mod);
 	walkers(worst)=walker_new;           %Insert new walker
-	logwidth=logwidth-log(1.0+1.0/options.nwalkers);   %Shrink interval
+        logsumwalkers=ns_logsumexp2(logsumwalkers,walker_new.logl+log(1-exp(worst_L-walker_new.logl)));
+        Zrat=exp(logwidth+logsumwalkers-logZ(1));
         if mod(i,ntest) == 0
-          fprintf('After %i iterations with %i parameter(s), Zrat =%.4f\n',i,length(walker_new.u),Zrat);
+          fprintf('After %i iterations with %i parameter(s), Zrat = %.3g\n',i,length(walker_new.u),Zrat);
           if isfield(model,'test')
             testlist(i/ntest).res=model.test(obs,model,logLstar,walkers,step_mod);
           end
@@ -167,15 +166,12 @@ for j=1:options.nwalkers
         for n = 2:length(nlist);
             n2 = nlist(n);
             sc_obs = model.scaling(obs,n2);
-            worst_L = logl_n(sc_obs,invprior(walkers(j).u),n2);
-            logWt = logwidth + worst_L;
+            worst_Ln = logl_n(sc_obs,invprior(walkers(j).u),n2);
+            logWt = logwidth + worst_Ln;
             logZ(n) = ns_logsumexp2(logZ(n),logWt);
         end
     end  
 end
-
-%%Adjust for samples with zero likelihood
-%logZ(1) = logZ(1)  + log(options.nwalkers / tries);
 
 %Calculate posterior probability of the samples
 for j=1:length(samples)
