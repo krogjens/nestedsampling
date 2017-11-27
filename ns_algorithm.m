@@ -15,12 +15,6 @@ function [logZ,H,samples,testlist]=ns_algorithm(obs,model)%
 %   If step_mod = 0, then the ns_evolve routine should initiate the variable by itself.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-if isfield(model.options,'ntest')
-  ntest=model.options.ntest;
-else
-  ntest=500;
-end
-
 if isfield(model.options,'maxsamples')
   maxsampm1=model.options.maxsamples-1;
 else
@@ -31,10 +25,6 @@ testlist={};
 
 options = model.options;
 logl = model.logl;
-
-if ~isfield(model,'evolver')
-  model.evolver=@(obs,model,logLstar,walker,step_mod)ns_evolve_rectangle(obs,model,logLstar,walker,step_mod);
-end
 
 if isfield(model,'logl_n')
    logl_n = model.logl_n;
@@ -132,10 +122,10 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
 	walkers(worst)=walker_new;           %Insert new walker
         logsumwalkers=ns_logsumexp2(logsumwalkers,walker_new.logl+log(1-exp(worst_L-walker_new.logl)));
         Zrat=exp(logwidth+logsumwalkers-logZ(1));
-        if mod(i,ntest) == 0
+        if mod(i,model.options.ntest) == 0
           fprintf('After %i iterations with %i parameter(s), Zrat = %.3g\n',i,length(walker_new.u),Zrat);
           if isfield(model,'test')
-            testlist(i/ntest).res=model.test(obs,model,logLstar,walkers,step_mod);
+            testlist(i/model.options.ntest).res=model.test(obs,model,logLstar,walkers,step_mod);
           end
         end
 	i = i + 1;

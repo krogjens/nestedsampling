@@ -22,7 +22,13 @@ for i=1:length(models)
     fprintf(fid,'\n');
     fprintf(fid,'Model %i (probability %.3f):\n',i,evi(i));
     fprintf(fid,'Estimated value for log10-evidence: %.3f +/- %.3f.\n',results(i).logZ(1)/log(10),results(i).logZ_error/log(10));
-    fprintf(fid,misc.titles{1});
+    perc_text='Percentile at:';
+    for j=1:min(length(misc.labels(1,:)),length(perc_text))
+      fprintf(fid,perc_text(j));
+    end
+    for j=length(perc_text):(length(misc.labels(1,:))-1)
+      fprintf(fid,' ');
+    end
     for j=1:length(misc.percentiles_at)
       fprintf(fid,ns_print_val(misc.percentiles_at(j),9));
     end

@@ -22,7 +22,7 @@ function [results]=ns_processdataset(obs,models,misc)
 %     ntest (optional) - number of iterations per print of status message and possible testing of MCMC convergence
 %   test (optional) - a function that tests MCMC convergence: test(obs,model,logLstar,walkers,step_mod)
 %
-%   labels - a list with the names of the parameters
+%   labels - a list with the names of the parameters (preferably 15 characters)
 %   add (optional) - a cell array with functions of theta
 %   replicate - function that generates artificial data by
 %     sampling from the posterier probability distribution for the parameters    
@@ -44,10 +44,9 @@ function [results]=ns_processdataset(obs,models,misc)
 % misc - a struct with fields
 %   data_id - the first part of the filenames for data and output
 %   percentiles_at - a list of values to find percentiles at
-%   labels - a list with names for the parameters (theta)
-%   titles - further titles/names for ns_print
 %   nssummary (optional) - final part of name of a summary file
-%   append (optional) - what to write initially if nssummary should be opened in append mode
+%     labels - (if nssummary) a list with names for the parameters (theta)
+%     append (optional) - what to write initially if nssummary should be opened in append mode
 %
 % results - a list of structs with fields
 %   logZ - the log of the evidence
@@ -69,6 +68,9 @@ function [results]=ns_processdataset(obs,models,misc)
 
 
 tic
+
+% Put in default settings where needed
+[models,misc]=ns_default_settings(obs,models,misc);
 
 % Run nested sampling algorithm for each model
 parfor i=1:length(models);
