@@ -63,9 +63,7 @@ models(2).genu=@() rand(1,2);
 %Specify the logl and logl_n
 log_normal=@(obs,mu,var) -log(sqrt(2*pi*var))*(length(obs)-1)-sum((obs(2:end)-obs(1:(end-1))-mu).^2)/(2*var);
 models(1).logl=@(obs,theta) log_normal(obs,0,2*theta(1));
-models(1).logl_n=@(obs,theta,n) log_normal(obs,0,2*theta(1)*n);
 models(2).logl=@(obs,theta) log_normal(obs,theta(2),2*theta(1));
-models(2).logl_n=@(obs,theta,n) log_normal(obs,theta(2)*n,2*theta(1)*n);
 
 %Specify the index for the labels
 models(1).labels=[1];
@@ -78,8 +76,6 @@ misc.percentiles_at=[0.02 0.16 0.5 0.84 0.98];
 misc.labels=...
 ['Diffusion constant: ';...
  'Drift:              '];
-misc.titles=...
-{'Percentile at:      '};
 
 %Specify output filename beginnings
 misc.data_id = 'simple';
