@@ -73,9 +73,16 @@ tic
 [models,misc]=ns_default_settings(obs,models,misc);
 
 % Run nested sampling algorithm for each model
-parfor i=1:length(models);
+if isfield(models(1).options,'Nparfor')
+  for i=1:length(models);
     [results(i).logZ,results(i).H,results(i).samples,results(i).testlist]...
         =ns_algorithm(obs,models(i));
+  end
+else
+  parfor i=1:length(models);
+    [results(i).logZ,results(i).H,results(i).samples,results(i).testlist]...
+        =ns_algorithm(obs,models(i));
+  end
 end
 
 % Calculate total evidence for the models

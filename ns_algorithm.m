@@ -31,6 +31,13 @@ if isfield(model,'logl_n')
 end
 invprior = model.invprior;
 
+if isfield(options,'Nparfor')
+   Nparfor = options.Nparfor;
+else
+   Nparfor = 1;
+end
+Nreserves=0;
+
 if isfield(options,'nlist')
    nlist = options.nlist;
 else
@@ -109,26 +116,57 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
             logZ(n) = ns_logsumexp2(logZ(n),logWt);
         end
     end  
-	
-	%Find random walker to initiate generation of new walker
-	copy = ceil(options.nwalkers*rand);  	%Choose random number 1<copy<n_prior
-	while(copy==worst && options.nwalkers>1) 
-		copy = ceil(options.nwalkers*rand);
-	end
-	logLstar=walkers(worst).logl;           %New likelihood constraint
 
-	%Evolve copied walker within constraint
-        [walker_new,step_mod]=model.evolver(obs,model,logLstar,walkers(copy),step_mod);
-	walkers(worst)=walker_new;           %Insert new walker
-        logsumwalkers=ns_logsumexp2(logsumwalkers,walker_new.logl+log(1-exp(worst_L-walker_new.logl)));
-        Zrat=exp(logwidth+logsumwalkers-logZ(1));
-        if mod(i,model.options.ntest) == 0
-          fprintf('After %i iterations with %i parameter(s), Zrat = %.3g\n',i,length(walker_new.u),Zrat);
-          if isfield(model,'test')
-            testlist(i/model.options.ntest).res=model.test(obs,model,logLstar,walkers,step_mod);
-          end
+    logLstar=walkers(worst).logl;           %New likelihood constraint
+    while Nreserves>0 && reserve(Nreserves).logl<=logLstar %|| length(find(copy(Nreserves)==[worst_list worst]))>0)
+      Nreserves=Nreserves-1;
+    end
+    if Nreserves>0
+      walker_new=reserve(Nreserves);
+      Nreserves=Nreserves-1;
+      worst_list=[worst_list worst];
+    elseif Nparfor==1
+      %Find random walker to initiate generation of new walker
+      copy = ceil(options.nwalkers*rand);  %Choose random number 1<copy<n_prior
+      while(copy==worst && options.nwalkers>1) 
+        copy = ceil(options.nwalkers*rand);
+      end
+      %Evolve copied walker within constraint
+      [walker_new,step_mod]=model.evolver(obs,model,logLstar,walkers(copy),step_mod);
+    else
+      worst_list=[];
+      copy=randperm(options.nwalkers-1,Nparfor);
+      for ipar=1:Nparfor
+        if copy(ipar)==worst
+          copy(ipar)=options.nwalkers;
         end
-	i = i + 1;
+      end
+      parfor ipar=1:Nparfor
+        [reserve(ipar),reserve_step_mod{ipar}]=model.evolver(obs,model,logLstar,walkers(copy(ipar)),step_mod);
+      end
+      for ipar=1:Nparfor
+        if reserve(ipar).u==walkers(copy(ipar)).u
+          fprintf('Warning (%i parameters): an evolved copy matched the original around iteration %i\n',length(reserve(ipar).u),i);
+        end
+      end
+      walker_new=reserve(Nparfor);
+      Nreserves=Nparfor-1;
+      step_mod=reserve_step_mod{1};
+      for ipar=2:Nparfor
+        step_mod=step_mod.*reserve_step_mod{ipar};
+      end
+      step_mod=nthroot(step_mod,Nparfor);
+    end 
+    walkers(worst)=walker_new;           %Insert new walker
+    logsumwalkers=ns_logsumexp2(logsumwalkers,walker_new.logl+log(1-exp(worst_L-walker_new.logl)));
+    Zrat=exp(logwidth+logsumwalkers-logZ(1));
+    if mod(i,model.options.ntest) == 0
+      fprintf('After %i iterations with %i parameter(s), Zrat = %.3g\n',i,length(walker_new.u),Zrat);
+      if isfield(model,'test')
+        testlist(i/model.options.ntest).res=model.test(obs,model,logLstar,walkers,step_mod);
+      end
+    end
+    i= i + 1;
 end
 
 %Add the remaning samples to the evidence estimate and sample output

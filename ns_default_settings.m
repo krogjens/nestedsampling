@@ -10,20 +10,22 @@ for i=1:length(models)
   if ~isfield(models(i),'options')
     models(i).options={};
   end
+%  nparams=length(models(i).genu());
   if ~isfield(models(i).options,'nwalkers')
     models(i).options.nwalkers=200; % Number of walkers to be generated
   end
   if ~isfield(models(i).options,'stoprat')
-    models(i).options.stoprat=10^(-3); % Z-ratio below which to stop nested sampling
+    models(i).options.stoprat=10^(-5); % Z-ratio below which to stop nested sampling
   end
   if ~isfield(models(i).options,'nsteps')
-    models(i).options.nsteps=50; % Number of steps per MCMC update
+    models(i).options.nsteps=30; % Number of steps per MCMC update
   end
   if ~isfield(models(i).options,'ntest')
     models(i).options.ntest=500;
   end
   if ~isfield(models(i),'evolver') || length(models(i).evolver)==0
-    models(i).evolver=@(obs,model,logLstar,walker,step_mod)ns_evolve_rectangle(obs,model,logLstar,walker,step_mod);
+    models(i).evolver=@(obs,model,logLstar,walker,step_mod)ns_evolve_separately(obs,model,logLstar,walker,step_mod);
+%    models(i).evolver=@(obs,model,logLstar,walker,step_mod)ns_evolve_rectangle(obs,model,logLstar,walker,step_mod);
   end
 end
 
