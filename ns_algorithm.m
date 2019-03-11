@@ -1,4 +1,4 @@
-function [logZ,H,samples,testlist]=ns_algorithm(obs,model)%
+function result=ns_algorithm(obs,model)%
 %,logl,logl_n,invprior,options)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Determines the evidence for a model with likelihood function logl
@@ -218,3 +218,9 @@ if isfield(model,'scaling')
         end
     end
 end
+
+result.logZ=logZ;
+result.H=H;
+result.samples=samples;
+result.testlist=testlist;
+

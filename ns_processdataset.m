@@ -48,12 +48,12 @@ function [results]=ns_processdataset(obs,models,misc)
 %     labels - (if nssummary) a list with names for the parameters (theta)
 %     append (optional) - what to write initially if nssummary should be opened in append mode
 %
-% results - a list of structs with fields
+% results - a list of result-structs each with fields
 %   logZ - the log of the evidence
 %   H - the information
 %   Z_norm - the posterior probability of the model
 %   logZ_error - estimated error on logZ
-%   samples - a list of structs with fields
+%   samples - a list of sample-structs each with fields
 %     theta - invprior(walker.u) for some walker
 %     post - the posterior probability of the sample
 %     logl - the log-likelihood models(i).logl(obs,sample.theta)
@@ -61,6 +61,7 @@ function [results]=ns_processdataset(obs,models,misc)
 %   param_stddev - ditto deviations
 %   percentiles - the percentiles of theta matching percentiles_at
 %   maxLpar - maximum likelihood parameters
+%   testlist - TODO
 %
 % The routine also outputs percentiles for the parameters as well as
 % performing an information content model check with the ns_infcheck function.
@@ -75,12 +76,12 @@ tic
 % Run nested sampling algorithm for each model
 if isfield(models(1).options,'Nparfor')
   for i=1:length(models);
-    [results(i).logZ,results(i).H,results(i).samples,results(i).testlist]...
+    results(i)...
         =ns_algorithm(obs,models(i));
   end
 else
   parfor i=1:length(models);
-    [results(i).logZ,results(i).H,results(i).samples,results(i).testlist]...
+    results(i)...
         =ns_algorithm(obs,models(i));
   end
 end

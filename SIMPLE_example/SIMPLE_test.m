@@ -18,7 +18,7 @@ model.invprior=@(u) [Dmin*exp(u(1)*log(Dmax/Dmin)); (mumax-mumin)*u(2)+mumin];
 
 %Specify options
 options.nwalkers=200;   % Number of walkers to be generated
-options.stoprat=10^(-3);% Ratio to stop sampling
+options.stoprat=10^(-1);% Ratio to stop sampling
 options.nsteps=30;      % Attempted number of steps in parameter space
 %options.ntest=500;
 model.options=options;
@@ -28,7 +28,7 @@ model.genu=@() rand(1,2);
 
 %Specify the functions that evolves the walker
 %model.evolver=@ns_evolve_rectangle;
-model.evolver=@ns_evolve_exp;
+%model.evolver=@ns_evolve_exp;
 
 %Specify the logl
 log_normal=@(obs,mu,var) -log(sqrt(2*pi*var))*(length(obs)-1)-sum((obs(2:end)-obs(1:(end-1))-mu).^2)/(2*var);
@@ -39,11 +39,15 @@ data=cumsum(sqrt(2*1)*randn(1000,1));
 
 %Specify the test routine
 ntesters=5*options.nwalkers;
-model.test=@(obs,model,logLstar,walkers,step_mod) ns_test_evolve_min(obs,model,logLstar,walkers,step_mod,ntesters);
+model.test=@(obs,model,logLstar,walkers,step_mod) ns_test_evolve_neighbor_min(obs,model,logLstar,walkers,step_mod,ntesters);
+
+%Add defaults
+[model,misc]=ns_default_settings(data,model,struct);
 
 %Run the nested sampling algorithm
-[logZ,H,samples,testlist] = ns_algorithm(data,model);
+results = ns_algorithm(data,model);
 
+testlist = results.testlist;
 %Plot the result of the test
 ncurves=length(testlist);
 curves=zeros(length(testlist(1).res)+1,ncurves);

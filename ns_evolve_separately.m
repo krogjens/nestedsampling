@@ -64,7 +64,7 @@ if(walker_new.logl <= logLstar)	% Do MCMC if likelihood requirement failed
    for n=1:length(step_mod)
      R = reject(n) / model.options.nsteps;  % Ratio of rejectance
      step_mod(n) = min(step_mod(n) * exp(0.25-R),1);     % Update step modifier
-     if R==1
+     if R==1 && model.options.nsteps>1
        fprintf('Warning (%i parameters): an iteration occurred with no moves in direction %i\n',length(walker.u),n);
      end
    end

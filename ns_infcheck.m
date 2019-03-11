@@ -6,6 +6,8 @@ logl = model.logl;
 if isfield(model,'scaling')
    scaling = model.scaling;
    logl_n = model.logl_n;
+else
+   scaling = @(x,n) x;
 end
 
 for n=1:length(n_list)
