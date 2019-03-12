@@ -7,13 +7,22 @@ function [percentiles,param_mean,param_stddev,maxLpar] = ns_analyze(samples,mode
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
    n_samp = length(samples);
-   n_theta = length(samples(1).theta);
-   thetas=[samples(1:n_samp).theta];
+   if isfield(model,'ntheta') && length(model.ntheta)>0
+     n_theta=model.ntheta;
+   else
+     n_theta = length(samples(1).theta);
+   end
+   thetas=NaN(n_theta,n_samp);
+   for i=1:n_theta
+     for j=1:n_samp
+       thetas(i,j)=samples(j).theta(i);
+     end
+   end
    if isfield(model,'add')
      for j=1:length(model.add)
        add=NaN(1,n_samp);
        for k=1:n_samp
-         add(k)=model.add{j}(thetas(1:n_theta,k));
+         add(k)=model.add{j}(samples(k).theta);
        end
        thetas=vertcat(thetas,add);
      end

@@ -33,7 +33,7 @@ for i=1:length(models)
       fprintf(fid,ns_print_val(misc.percentiles_at(j),9));
     end
     fprintf(fid,' MaxL@    Mean    +/- dev.\n');
-    for j=1:length(models(i).labels)
+    for j=1:min(length(models(i).labels),length(results(i).param_mean))
       if models(i).labels(j)>0
         fprintf(fid,misc.labels(models(i).labels(j),:));
         for k=1:length(misc.percentiles_at)
