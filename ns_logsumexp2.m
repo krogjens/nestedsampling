@@ -1,4 +1,4 @@
-function z = logsumexp2(x, y)
+function z = ns_logsumexp2(x, y)
 % z = log(exp(x)+exp(y))
 
 if x == -Inf && y == -Inf
