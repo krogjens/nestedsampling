@@ -1,0 +1,29 @@
+Highest evidence for Model 1 (probability NaN). 
+
+Model 1 (probability NaN):
+Estimated value for log10-evidence: -391.968 +/- 0.070.
+Percentile at:   0.02     0.16     0.50     0.84     0.98     MaxL@    Mean    +/- dev.
+log10-Maximal likelihood: -388.389
+
+Model 2 (probability NaN):
+Estimated value for log10-evidence: -393.703 +/- 0.084.
+Percentile at:   0.02     0.16     0.50     0.84     0.98     MaxL@    Mean    +/- dev.
+Step deviation:  0.566    0.579    0.592    0.605    0.621    0.592    0.592   +/- 0.013   
+log10-Maximal likelihood: -388.389
+
+Model 3 (probability NaN):
+Estimated value for log10-evidence: NaN +/- NaN.
+Percentile at:   0.02     0.16     0.50     0.84     0.98     MaxL@    Mean    +/- dev.
+log10-Maximal likelihood: NaN
+
+Model 4 (probability NaN):
+Estimated value for log10-evidence: 374.862 +/- 0.166.
+Percentile at:   0.02     0.16     0.50     0.84     0.98     MaxL@    Mean    +/- dev.
+log10-Maximal likelihood:  394.297
+
+Model 5 (probability NaN):
+Estimated value for log10-evidence: NaN +/- NaN.
+Percentile at:   0.02     0.16     0.50     0.84     0.98     MaxL@    Mean    +/- dev.
+Exponent:       NaN      NaN      NaN      NaN      NaN       81.989  NaN      +/-NaN      
+log10-Maximal likelihood: NaN
+
