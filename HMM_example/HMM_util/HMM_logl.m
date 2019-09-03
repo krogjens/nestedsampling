@@ -5,12 +5,18 @@ function logl = HMM_logl(obs,theta, nstates,ndrifts,T,dt)
 % transition rate matrix into probabilities as A_prop= expm(dt*A_rate)) and
 % also taking log(A_prop) so it it calculated outside of a loop, for
 % effeciency
-
-p=theta(end-nstates+1:end);
-logA=log(expm(dt*reshape(theta(nstates+1+2*ndrifts:end-nstates),nstates,nstates)));
+if nstates > 1
+    p=theta(end-nstates+1:end);
+    logA=log(expm(dt*reshape(theta(nstates+1+2*ndrifts:end-nstates),nstates,nstates)));
+else 
+    p=1;
+    logA=1;
+end
 B=theta(1:nstates);
 u=zeros(nstates*2);
-u(1:ndrifts*2)=theta(nstates+1:nstates+2*ndrifts);
+if ndrifts > 0 
+    u(1:ndrifts*2)=theta(nstates+1:nstates+2*ndrifts);
+end
 logl=ForwardAlgorithm(obs,p,logA(:),B,u,nstates,ndrifts,T);
 % 
 % %hmm_logl(p,logA,B,u,D,x,y, T,J, l2p,thetas)
