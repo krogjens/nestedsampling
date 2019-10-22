@@ -22,7 +22,7 @@ for i=1:length(models)
     fprintf(fid,'\n');
     fprintf(fid,'Model %i (probability %.3f):\n',i,evi(i));
     fprintf(fid,'Estimated value for log10-evidence: %.3f +/- %.3f.\n',results(i).logZ(1)/log(10),results(i).logZ_error/log(10));
-    perc_text='Percentile at:';
+    perc_text='Percentile:';
     for j=1:min(length(misc.labels(1,:)),length(perc_text))
       fprintf(fid,perc_text(j));
     end
@@ -105,4 +105,22 @@ for i=1:length(models)
 end
 fprintf(fid,'\n');
 fclose(fid);
+end
 
+%%% A function that prints a value with a format depending on its magnitude %%%
+function txt = ns_print_val(val,len)
+  if mod(val,1)==0
+    txt=sprintf('% -i',val);
+  elseif abs(val)>=0.01 & abs(val)<100
+    if mod(val,0.01)==0
+      txt=sprintf('% .2f ',val);
+    else
+      txt=sprintf('% .3f',val);
+    end
+  else
+    txt=sprintf('% .1e',val);
+  end
+  for j=1:(len-length(txt))
+    txt=[txt ' '];
+  end
+end
