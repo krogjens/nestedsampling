@@ -102,6 +102,19 @@ for i=1:length(models)
         end
       end
     end
+  if isfield(results,'bgof') && isfield(results(i).bgof,'logZmod')
+    fprintf(fid,'Bayesian goodness-of-fit (spread is std(log10(beta))):\n');
+    [Bsorted,id]=sort(results(i).bgof.logZmod,'descend');
+    fprintf(fid,' ncomb log10(B) spread   <phi>   +/- std(phi)\n');
+    for j=1:length(results(i).bgof.logZmod)
+      fprintf(fid,ns_print_val(id(j),6));
+      fprintf(fid,ns_print_val(results(i).bgof.logZmod(id(j))*log10(exp(1)),9));
+      fprintf(fid,ns_print_val(results(i).bgof.stddev_logbeta(id(j))*log10(exp(1)),9));
+      fprintf(fid,ns_print_val(results(i).bgof.phi_mean(id(j)),9));
+      fprintf(fid,['+/-' ns_print_val(results(i).bgof.phi_stddev(id(j)),9)]);
+      fprintf(fid,'\n');
+    end
+  end
 end
 fprintf(fid,'\n');
 fclose(fid);

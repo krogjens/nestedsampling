@@ -119,6 +119,12 @@ else
     end
 end
 
+if isfield(models,'bgof')
+  evi = [results(:).Z_norm];
+  [~,best] = max(evi);
+  results(best).bgof=bgof_main(obs,results(best).samples,models(best).bgof);
+end
+
 %Print a summary of the results to a text file if wanted
 if isfield(misc,'nssummary')
   ns_print(results,models,misc)
