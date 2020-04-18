@@ -60,7 +60,7 @@ models(2).options=options;
 models(1).genu=@() rand(1,1);
 models(2).genu=@() rand(1,2);
 
-%Specify the logl and logl_n
+%Specify the logl
 log_normal=@(obs,mu,var) -log(sqrt(2*pi*var))*(length(obs)-1)-sum((obs(2:end)-obs(1:(end-1))-mu).^2)/(2*var);
 models(1).logl=@(obs,theta) log_normal(obs,0,2*theta(1));
 models(2).logl=@(obs,theta) log_normal(obs,theta(2),2*theta(1));
