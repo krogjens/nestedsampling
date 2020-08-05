@@ -1,4 +1,4 @@
-function SIMPLE_skel()
+function SIMPLE_skel(data)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%   
 % This skeleton routine carries out Bayesian inference 
@@ -40,20 +40,20 @@ function SIMPLE_skel()
 % Model 2 is Brownian motion with a drift
 
 %Specify a Jeffreys prior on the diffusion constant
-Dmin=10^(-1);
-Dmax=10^2;   
+Dmin=10^(-3);
+Dmax=10^3;   
 models(1).invprior=@(u) Dmin*exp(u*log(Dmax/Dmin));
 
 %Additionally specify a uniform prior on the drift for Model 2
-mumin=-10;
-mumax=10;
+mumin=-1000;
+mumax=1000;
 models(2).invprior=@(u) [Dmin*exp(u(1)*log(Dmax/Dmin)); (mumax-mumin)*u(2)+mumin];
 
 %Specify options
 options.nwalkers=200;   % Number of walkers to be generated
 options.stoprat=10^(-3);% Ratio to stop sampling
 options.nsteps=30;      % Attempted number of steps in parameter space
-%options.Nparfor=200;
+%options.Nparfor=1;
 models(1).options=options;
 models(2).options=options;
 
@@ -80,7 +80,7 @@ misc.labels=...
 
 %Specify output filename beginnings
 misc.data_id = 'simple';
-data=cumsum(sqrt(2*1)*randn(1000,1));
+%data=cumsum(sqrt(2*1)*randn(1000,1));
 
 %Tell ns_print to write a summary-file
 misc.nssummary=['_results.txt'];

@@ -1,15 +1,15 @@
-Highest evidence for Model 1 (probability 0.999). 
+Highest evidence for Model 1 (probability 1.000). 
 
-Model 1 (probability 0.999):
-Estimated value for log10-evidence: -772.971 +/- 0.068.
-Percentile at:       0.02     0.16     0.50     0.84     0.98     MaxL@    Mean    +/- dev.
-Diffusion constant:  0.921    0.959    1.013    1.077    1.137    1.021    1.021   +/- 0.057   
-log10-Maximal likelihood: -770.523
+Model 1 (probability 1.000):
+Estimated value for log10-evidence: -15374.719 +/- 0.074.
+Percentile:          0.02     0.16     0.50     0.84     0.98     MaxL@    Mean    +/- dev.
+Diffusion constant:  0.989    1.000    1.009    1.019    1.031    1.009    1.009   +/- 1.0e-02 
+log10-Maximal likelihood: -15372.007
 
-Model 2 (probability 0.001):
-Estimated value for log10-evidence: -775.974 +/- 0.102.
-Percentile at:       0.02     0.16     0.50     0.84     0.98     MaxL@    Mean    +/- dev.
-Diffusion constant:  0.919    0.960    1.029    1.089    1.136    1.022    1.027   +/- 0.058   
-Drift:              -0.114   -0.070   -0.013    0.051    0.101   -9.1e-03 -0.011   +/- 0.057   
-log10-Maximal likelihood: -770.515
+Model 2 (probability 0.000):
+Estimated value for log10-evidence: -15379.193 +/- 0.125.
+Percentile:          0.02     0.16     0.50     0.84     0.98     MaxL@    Mean    +/- dev.
+Diffusion constant:  0.987    0.998    1.009    1.019    1.029    1.009    1.009   +/- 0.010   
+Drift:              -6.8e-03  4.6e-03  0.014    0.025    0.034    0.014    0.014   +/- 0.010   
+log10-Maximal likelihood: -15371.577
 

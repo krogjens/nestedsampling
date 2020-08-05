@@ -135,7 +135,8 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
       [walker_new,step_mod]=model.evolver(obs,model,logLstar,walkers(copy),step_mod);
     else
       worst_list=[];
-      copy=randperm(options.nwalkers-1,Nparfor);
+      %copy=randperm(options.nwalkers-1,Nparfor);
+      copy=randi(options.nwalkers-1,Nparfor);
       for ipar=1:Nparfor
         if copy(ipar)==worst
           copy(ipar)=options.nwalkers;
@@ -151,11 +152,11 @@ while (Zrat>options.stoprat) 	%Stops when the increments of the integral are sma
       end
       walker_new=reserve(Nparfor);
       Nreserves=Nparfor-1;
-      step_mod=reserve_step_mod{1};
+      step_mod=log(reserve_step_mod{1});
       for ipar=2:Nparfor
-        step_mod=step_mod.*reserve_step_mod{ipar};
+        step_mod=step_mod+log(reserve_step_mod{ipar});
       end
-      step_mod=nthroot(step_mod,Nparfor);
+      step_mod=exp(step_mod/Nparfor);
     end 
     walkers(worst)=walker_new;           %Insert new walker
     logsumwalkers=ns_logsumexp2(logsumwalkers,walker_new.logl+log(1-exp(worst_L-walker_new.logl)));

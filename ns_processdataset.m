@@ -119,10 +119,14 @@ else
     end
 end
 
-if isfield(models,'bgof')
-  evi = [results(:).Z_norm];
-  [~,best] = max(evi);
-  results(best).bgof=bgof_main(obs,results(best).samples,models(best).bgof);
+evi = [results(:).Z_norm];
+[~,best] = max(evi);
+if isfield(models(best),'opt') && isfield(models(best).opt,'x2u')
+  if ~isfield(models(best),'bgof')
+    results(best).bgof=bgof_main(obs,results(best).samples,models(best).opt.x2u,struct);
+  else
+    results(best).bgof=bgof_main(obs,results(best).samples,models(best).opt.x2u,models(best).bgof);
+  end
 end
 
 %Print a summary of the results to a text file if wanted
